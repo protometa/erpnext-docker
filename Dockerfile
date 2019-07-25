@@ -2,8 +2,8 @@ FROM ubuntu:18.04
 
 LABEL maintainer="//SEIBERT/MEDIA GmbH  <docker@seibert-media.net>"
 
-ARG FRAPPE_VERSION=v11.1.41
-ARG ERPNEXT_VERSION=v11.1.44
+ARG FRAPPE_VERSION=v11.1.43
+ARG ERPNEXT_VERSION=v11.1.48
 ARG BENCH_VERSION=master
 
 RUN set -x \
@@ -37,12 +37,13 @@ RUN set -x \
 	mariadb-common \
 	nodejs \
 	npm \
-	python3-dev \
-	python3-pip \
-	python3-setuptools \
-	python3-tk \
-	python3-wheel \
+	python-dev \
+	python-pip \
+	python-setuptools \
+	python-wheel \
+	python3-distutils \
 	redis-tools \
+	redis-server \
 	rlwrap \
 	software-properties-common \
 	ssh \
@@ -70,29 +71,30 @@ RUN curl --connect-timeout 10 --max-time 120 -sSL https://github.com/wkhtmltopdf
 	&& dpkg -i wkhtmltopdf.deb \
 	&& rm wkhtmltopdf.deb
 
+RUN pip install virtualenv
 RUN npm install -g yarn
 
+USER frappe
 WORKDIR /home/frappe
 RUN git clone -b ${BENCH_VERSION} https://github.com/frappe/bench.git bench-repo
-RUN pip3 install -e bench-repo
-RUN chown -R frappe:frappe /home/frappe
+RUN pip install --user -e bench-repo
+ENV PATH=/home/frappe/.local/bin:$PATH
 
-USER frappe
-RUN bench init /home/frappe/bench-repo --ignore-exist --skip-redis-config-generation --frappe-branch ${FRAPPE_VERSION} --python python3
-RUN /home/frappe/bench-repo/env/bin/pip install html5lib uwsgi
-
-WORKDIR /home/frappe/bench-repo
-RUN bench get-app erpnext https://github.com/frappe/erpnext.git --branch ${ERPNEXT_VERSION}
-
-USER root
-RUN mkdir -p /var/log/supervisor
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY nginx.conf /etc/nginx/sites-available/default
-COPY bench-repo .
-
-COPY entrypoints /entrypoints/
+RUN bench init frappe-bench --ignore-exist --frappe-branch ${FRAPPE_VERSION}
+WORKDIR /home/frappe/frappe-bench
+RUN bench get-app erpnext https://github.com/frappe/erpnext
 
 COPY entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+# RUN /home/frappe/bench-repo/env/bin/pip install html5lib uwsgi
 
-CMD ["/usr/bin/supervisord"]
+# WORKDIR /home/frappe/frappe-bench
+# RUN bench new-site site1.local
+# RUN bench get-app erpnext https://github.com/frappe/erpnext.git --branch ${ERPNEXT_VERSION}
+# RUN bench --site site1.local install-app erpnext
+
+# RUN bench setup production
+# RUN ln -s ./config/supervisor.conf /etc/supervisor/conf.d/frappe-bench.conf
+# RUN bench setup nginx
+# RUN ln -s ./config/nginx.conf /etc/nginx/conf.d/frappe-bench.conf
+
+# ENTRYPOINT ["/entrypoint.sh"]
