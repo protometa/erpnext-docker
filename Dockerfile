@@ -74,27 +74,25 @@ RUN curl --connect-timeout 10 --max-time 120 -sSL https://github.com/wkhtmltopdf
 RUN pip install virtualenv
 RUN npm install -g yarn
 
+RUN git clone -b ${BENCH_VERSION} https://github.com/frappe/bench.git bench-repo
+RUN pip install -e bench-repo
+
 USER frappe
 WORKDIR /home/frappe
-RUN git clone -b ${BENCH_VERSION} https://github.com/frappe/bench.git bench-repo
-RUN pip install --user -e bench-repo
 ENV PATH=/home/frappe/.local/bin:$PATH
 
-RUN bench init frappe-bench --ignore-exist --frappe-branch ${FRAPPE_VERSION}
+RUN bench init frappe-bench --skip-redis-config-generation
 WORKDIR /home/frappe/frappe-bench
 RUN bench get-app erpnext https://github.com/frappe/erpnext
+RUN bench setup supervisor
+RUN bench setup nginx
+COPY new-site.sh /new-site.sh
+
+USER root
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY nginx.conf /etc/nginx/sites-available/default
 
 COPY entrypoint.sh /entrypoint.sh
 # RUN /home/frappe/bench-repo/env/bin/pip install html5lib uwsgi
 
-# WORKDIR /home/frappe/frappe-bench
-# RUN bench new-site site1.local
-# RUN bench get-app erpnext https://github.com/frappe/erpnext.git --branch ${ERPNEXT_VERSION}
-# RUN bench --site site1.local install-app erpnext
-
-# RUN bench setup production
-# RUN ln -s ./config/supervisor.conf /etc/supervisor/conf.d/frappe-bench.conf
-# RUN bench setup nginx
-# RUN ln -s ./config/nginx.conf /etc/nginx/conf.d/frappe-bench.conf
-
-# ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]

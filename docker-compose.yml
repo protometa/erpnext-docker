@@ -4,11 +4,11 @@ services:
   mariadb:
     image: "mariadb:10.3.9"
     environment:
-      - MYSQL_ROOT_HOST=mariadb
+      - MYSQL_ROOT_HOST=%
       - MYSQL_ROOT_PASSWORD=123
-      - MYSQL_USER=1bd3e0294da19198
-      - MYSQL_DATABASE=1bd3e0294da19198
-      - MYSQL_PASSWORD=iAlcDxokJhGvpxaK
+      - MYSQL_USER=frappe
+      - MYSQL_DATABASE=frappe
+      - MYSQL_PASSWORD=password
     volumes:
       - ./mariadb-conf:/etc/mysql/conf.d
       # - ./mariadb-initdb:/docker-entrypoint-initdb.d
@@ -16,38 +16,42 @@ services:
   redis-cache:
     image: redis:4.0.11-alpine
     volumes:
-      - redis-cache-conf:/etc/conf.d/
+      - ./redis-conf/redis_cache.conf:/etc/conf.d/redis.conf
     command: ["redis-server","/etc/conf.d/redis.conf"]
 
   redis-queue:
     image: redis:4.0.11-alpine
     volumes:
-      - redis-queue-conf:/etc/conf.d/
+      - ./redis-conf/redis_queue.conf:/etc/conf.d/redis.conf
     command: ["redis-server","/etc/conf.d/redis.conf"]
 
   redis-socketio:
     image: redis:4.0.11-alpine
     volumes:
-      - redis-socketio-conf:/etc/conf.d/
+      - ./redis-conf/redis_socketio.conf:/etc/conf.d/redis.conf
     command: ["redis-server","/etc/conf.d/redis.conf"]
 
   erpnext:
     build:
       context: .
-    container_name: erpnext
     ports:
       - "8080:8080"
+      - "9000:9000"
     environment:
       - DB_ROOT_PASSWORD=123
       - ADMIN_PASSWORD=123
       - DB_HOST=mariadb
-      - DB_NAME=1bd3e0294da19198
-      - DB_PASSWORD=iAlcDxokJhGvpxaK
-      - ENCRYPTION_KEY=vZUk5YjEeRdQkGWOFecw2TBFIvmxB7gJ7lZwIE3S9Ds=
-      - WORKER=2
-    command: /entrypoint.sh
+      - DB_NAME=frappe
+      - DB_PASSWORD=password
+      # - ENCRYPTION_KEY=vZUk5YjEeRdQkGWOFecw2TBFIvmxB7gJ7lZwIE3S9Ds=
+      # - WORKER=2
+      - REDIS_CACHE=redis://redis-cache:13000
+      - REDIS_QUEUE=redis://redis-queue:11000
+      - REDIS_SOCKETIO=redis://redis-socketio:12000
+    # command: /entrypoint.sh
     # volumes:
-    #   - mariadb-conf:/etc/mysql/conf.d
+    #   - ./supervisord.conf:/supervisord.conf
+    #   - ./nginx.conf:/nginx.conf
     extra_hosts:
       - "site1.local:127.0.0.1"
     links:
@@ -55,8 +59,3 @@ services:
       - redis-queue
       - redis-socketio
       - mariadb
-
-volumes:
-  redis-queue-conf:
-  redis-cache-conf:
-  redis-socketio-conf:
