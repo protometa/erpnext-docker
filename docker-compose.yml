@@ -6,9 +6,6 @@ services:
     environment:
       - MYSQL_ROOT_HOST=%
       - MYSQL_ROOT_PASSWORD=123
-      - MYSQL_USER=frappe
-      - MYSQL_DATABASE=frappe
-      - MYSQL_PASSWORD=password
     volumes:
       - ./conf/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
       - data:/var/lib/mysql
@@ -32,6 +29,7 @@ services:
     command: ["redis-server","/etc/conf.d/redis.conf"]
 
   erpnext:
+    hostname: erpnext
     build:
       context: .
     ports:
@@ -41,10 +39,6 @@ services:
       - DB_ROOT_PASSWORD=123
       - ADMIN_PASSWORD=123
       - DB_HOST=mariadb
-      - DB_NAME=frappe
-      - DB_PASSWORD=password
-      # - ENCRYPTION_KEY=vZUk5YjEeRdQkGWOFecw2TBFIvmxB7gJ7lZwIE3S9Ds=
-      # - WORKER=2
       - REDIS_CACHE=redis://redis-cache:13000
       - REDIS_QUEUE=redis://redis-queue:11000
       - REDIS_SOCKETIO=redis://redis-socketio:12000
