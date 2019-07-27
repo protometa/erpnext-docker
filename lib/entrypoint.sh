@@ -1,5 +1,5 @@
 #!/bin/bash -e
 
-su --preserve-environment -lc /new-site.sh frappe
+runuser -mu frappe /new-site.sh
 
 exec supervisord --configuration /etc/supervisor/conf.d/supervisord.conf --nodaemon
