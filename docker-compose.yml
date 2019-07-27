@@ -5,7 +5,7 @@ services:
     image: "mariadb:10.3.9"
     environment:
       - MYSQL_ROOT_HOST=%
-      - MYSQL_ROOT_PASSWORD=123
+      - MYSQL_ROOT_PASSWORD=secret-root-pw
     volumes:
       - ./conf/mysql.cnf:/etc/mysql/conf.d/docker.cnf
       - data:/var/lib/mysql
@@ -29,15 +29,14 @@ services:
     command: ["redis-server","/etc/conf.d/redis.conf"]
 
   erpnext:
-    hostname: erpnext
+    image: teknomadix/erpnext:0
     build:
       context: .
     ports:
       - "8080:8080"
-      - "9000:9000"
     environment:
-      - DB_ROOT_PASSWORD=123
-      - ADMIN_PASSWORD=123
+      - DB_ROOT_PASSWORD=secret-root-pw
+      - ADMIN_PASSWORD=secret-admin-pw
       - DB_HOST=mariadb
       - REDIS_CACHE=redis://redis-cache:13000
       - REDIS_QUEUE=redis://redis-queue:11000
