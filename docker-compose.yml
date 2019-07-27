@@ -10,25 +10,25 @@ services:
       - MYSQL_DATABASE=frappe
       - MYSQL_PASSWORD=password
     volumes:
-      - ./mariadb-conf:/etc/mysql/conf.d
-      # - ./mariadb-initdb:/docker-entrypoint-initdb.d
+      - ./conf/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - data:/var/lib/mysql
 
   redis-cache:
     image: redis:4.0.11-alpine
     volumes:
-      - ./redis-conf/redis_cache.conf:/etc/conf.d/redis.conf
+      - ./conf/redis_cache.conf:/etc/conf.d/redis.conf
     command: ["redis-server","/etc/conf.d/redis.conf"]
 
   redis-queue:
     image: redis:4.0.11-alpine
     volumes:
-      - ./redis-conf/redis_queue.conf:/etc/conf.d/redis.conf
+      - ./conf/redis_queue.conf:/etc/conf.d/redis.conf
     command: ["redis-server","/etc/conf.d/redis.conf"]
 
   redis-socketio:
     image: redis:4.0.11-alpine
     volumes:
-      - ./redis-conf/redis_socketio.conf:/etc/conf.d/redis.conf
+      - ./conf/redis_socketio.conf:/etc/conf.d/redis.conf
     command: ["redis-server","/etc/conf.d/redis.conf"]
 
   erpnext:
@@ -48,10 +48,8 @@ services:
       - REDIS_CACHE=redis://redis-cache:13000
       - REDIS_QUEUE=redis://redis-queue:11000
       - REDIS_SOCKETIO=redis://redis-socketio:12000
-    # command: /entrypoint.sh
-    # volumes:
-    #   - ./supervisord.conf:/supervisord.conf
-    #   - ./nginx.conf:/nginx.conf
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
     extra_hosts:
       - "site1.local:127.0.0.1"
     links:
@@ -59,3 +57,7 @@ services:
       - redis-queue
       - redis-socketio
       - mariadb
+
+volumes:
+  data:
+  sites:
