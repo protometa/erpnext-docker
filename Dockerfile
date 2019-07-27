@@ -81,9 +81,10 @@ USER frappe
 WORKDIR /home/frappe
 ENV PATH=/home/frappe/.local/bin:$PATH
 
-RUN bench init frappe-bench --skip-redis-config-generation
+RUN bench init frappe-bench --skip-redis-config-generation --frappe-branch ${FRAPPE_VERSION}
 WORKDIR /home/frappe/frappe-bench
-RUN bench get-app erpnext https://github.com/frappe/erpnext
+RUN bench get-app erpnext https://github.com/frappe/erpnext --branch ${ERPNEXT_VERSION}
+RUN pip install html5lib uwsgi
 COPY ./lib/new-site.sh /new-site.sh
 
 USER root
@@ -91,6 +92,5 @@ COPY ./conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY ./conf/nginx.conf /etc/nginx/conf.d/frappe-bench.conf
 
 COPY ./lib/entrypoint.sh /entrypoint.sh
-# RUN /home/frappe/bench-repo/env/bin/pip install html5lib uwsgi
 
 ENTRYPOINT ["/entrypoint.sh"]
