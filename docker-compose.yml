@@ -7,7 +7,7 @@ services:
       - MYSQL_ROOT_HOST=%
       - MYSQL_ROOT_PASSWORD=123
     volumes:
-      - ./conf/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./conf/mysql.cnf:/etc/mysql/conf.d/docker.cnf
       - data:/var/lib/mysql
 
   redis-cache:
