@@ -29,7 +29,7 @@ services:
     command: ["redis-server","/etc/conf.d/redis.conf"]
 
   erpnext:
-    image: teknomadix/erpnext
+    image: protometa/erpnext
     build:
       context: .
     ports:
