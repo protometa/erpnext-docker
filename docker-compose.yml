@@ -42,7 +42,7 @@ services:
       - REDIS_QUEUE=redis://redis-queue:11000
       - REDIS_SOCKETIO=redis://redis-socketio:12000
     volumes:
-      - sites:/home/frappe/frappe-bench/sites
+      - site:/home/frappe/frappe-bench/sites/site1.local
     extra_hosts:
       - "site1.local:127.0.0.1"
     links:
@@ -53,4 +53,4 @@ services:
 
 volumes:
   data:
-  sites:
+  site:

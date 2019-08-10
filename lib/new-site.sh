@@ -11,7 +11,8 @@ bench set-config -g redis_cache $REDIS_CACHE
 bench set-config -g redis_queue $REDIS_QUEUE
 bench set-config -g redis_socketio $REDIS_SOCKETIO
 
-if [ ! -d sites/site1.local/ ]; then
+# if site1.local is empty or doesn't exist
+if [ ! "$(ls -A sites/site1.local/)" ]; then
   bench new-site site1.local \
     --mariadb-root-password "$DB_ROOT_PASSWORD" \
     --admin-password "$ADMIN_PASSWORD" \
