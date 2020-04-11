@@ -13,6 +13,8 @@ bench set-config -g redis_socketio $REDIS_SOCKETIO
 
 # if sites/site1.local/site_config.json doesn't exist 
 if [ ! -f sites/site1.local/site_config.json ]; then
+  echo "Initializing site1.local..."
+  rm -rf sites/site1.local/*
   bench new-site site1.local \
     --mariadb-root-password "$DB_ROOT_PASSWORD" \
     --admin-password "$ADMIN_PASSWORD" \
